@@ -20,12 +20,15 @@ class Model_SubspaceAnchor_SVC(nn.Module):
     子空间锚点单视角模型。
     """
 
-    def __init__(self, U, A,
-                 lr: float = 0.1,
-                 epochs: int = 100,
-                 valid_freq=10,
-                 verbose=False,
-                 ):
+    def __init__(
+        self,
+        U,
+        A,
+        lr: float = 0.1,
+        epochs: int = 100,
+        valid_freq=10,
+        verbose=False,
+    ):
         super().__init__()
         self.lr = lr
         self.epochs = epochs
@@ -84,9 +87,9 @@ def learn_anchor_graph(A: np.ndarray, U: np.ndarray, device: int):
 
 
 def fuse_incomplete_view_z(
-        Z: List[Tensor],
-        W: List[Tensor],
-        output_shape: tuple,
+    Z: List[Tensor],
+    W: List[Tensor],
+    output_shape: tuple,
 ):
     """
     将按照[A, U]排列的局部锚点图融合为全局锚点图（按原始样本顺序）
@@ -140,18 +143,16 @@ def view_specific_kmeans(X, num_anchors, device: int):
 
 
 def train_main(
-        datapath=P("./data/ORL-40.mat"),
-        eta=0.5,
-        views=None,
-
-        k: int = 5,
-        t1: int = 20,
-        t2: int = 20,
-        view_graph: str = 'bagging',
-
-        device="cpu",
-        savedir: P = P("output/debug"),
-        save_vars: bool = False,
+    datapath=P("./data/ORL-40.mat"),
+    eta=0.5,
+    views=None,
+    k: int = 5,
+    t1: int = 20,
+    t2: int = 20,
+    view_graph: str = "bagging",
+    device="cpu",
+    savedir: P = P("output/debug"),
+    save_vars: bool = False,
 ):
     # if 'ORL' in datapath.name:
     #     k = 3
@@ -185,7 +186,7 @@ def train_main(
     )
 
     print(data.describe())
-    
+
     X_all = data.X_all_list
     idx_all = data.idx_all_list
     num_anchors = int(k * data.clusterNum)
@@ -197,18 +198,26 @@ def train_main(
     for j in range(t2):
         Z = [None] * data.viewNum
         for v in range(data.viewNum):
-            if view_graph == 'kmeans':
-                Z[v] = view_specific_kmeans(X_all[v], num_anchors=num_anchors, device=device)
-            elif view_graph == 'bagging':
-                Z[v] = view_specific_bagging(X_all[v], num_anchors=num_anchors, device=device, t=t1)
+            if view_graph == "kmeans":
+                Z[v] = view_specific_kmeans(
+                    X_all[v], num_anchors=num_anchors, device=device
+                )
+            elif view_graph == "bagging":
+                Z[v] = view_specific_bagging(
+                    X_all[v], num_anchors=num_anchors, device=device, t=t1
+                )
 
         Z = convert_tensor(Z, dev=device)
-        Z_common += fuse_incomplete_view_z(Z=Z, W=idx_all, output_shape=(data.sampleNum, num_anchors))
+        Z_common += fuse_incomplete_view_z(
+            Z=Z, W=idx_all, output_shape=(data.sampleNum, num_anchors)
+        )
         Z_temp = Z_common / (j + 1)
-        metrics, ff = Evaluate_Graph(data=data, Z=Z_temp, type='fastSVD', return_spectral_embedding=True)
-        print(f'epoch {j:02} metrics {metrics}')
+        metrics, ff = Evaluate_Graph(
+            data=data, Z=Z_temp, type="fastSVD", return_spectral_embedding=True
+        )
+        print(f"epoch {j:02} metrics {metrics}")
         history.append(metrics)
-        if mm.update(**metrics)['ACC'] and save_vars:
+        if mm.update(**metrics)["ACC"] and save_vars:
             H_common = ff
 
     train_end(savedir, mm.report(current=False))

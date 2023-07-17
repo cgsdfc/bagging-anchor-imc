@@ -1,5 +1,5 @@
 # MIT License
-# Copyright (c) 2023 Ao Li, Cong Feng
+# Copyright (c) 2024 Ao Li, Cong Feng
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -21,9 +21,7 @@
 from src.models.baimc import train_main
 from pathlib import Path as P
 import logging
-import numpy as np
 import warnings
-import itertools
 from src.vis.visualize import *
 from src.utils.io_utils import *
 import matplotlib.pyplot as plt
@@ -46,8 +44,8 @@ if __name__ == "__main__":
         device='cpu',
         savedir=savedir,
         save_vars=True,
-        t2=5,
-        t1=50,
+        t2=20,
+        t1=20,
         k=5,
     )
 
